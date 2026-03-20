@@ -15,10 +15,7 @@ from typing import Optional
 from fastmcp import FastMCP
 
 # ── Init ──────────────────────────────────────────────────────────────────────
-mcp = FastMCP(
-    name="sncf-trains",
-    description="Search French train schedules (SNCF/TGV/TER) via the SNCF API",
-)
+mcp = FastMCP(name="sncf-trains")
 
 SNCF_BASE = "https://api.sncf.com/v1/coverage/sncf"
 
