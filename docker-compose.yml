@@ -5,12 +5,12 @@ services:
     container_name: sncf-mcp
     restart: unless-stopped
     environment:
-      # Nunca pongas el token directamente aquí.
-      # Usa un fichero .env en la misma carpeta:
-      #   echo "NAVITIA_TOKEN=tu_token" > .env
+      # Never hardcode the token here.
+      # Create a .env file in this directory:
+      #   echo "NAVITIA_TOKEN=your_token" > .env
       NAVITIA_TOKEN: ${NAVITIA_TOKEN}
-    # MCP stdio no expone puertos — el cliente lo llama como proceso
-    # Si en el futuro quieres modo SSE/HTTP (para claude.ai web), descomenta:
+    # MCP stdio transport does not expose ports.
+    # Uncomment below if you add SSE/HTTP mode in the future (for claude.ai web):
     # ports:
     #   - "8000:8000"
     stdin_open: true

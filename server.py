@@ -34,7 +34,7 @@ def get_token() -> str:
 
 def navitia_get(path: str, params: dict = {}) -> dict:
     """Make an authenticated GET request to the Navitia API (Basic Auth)."""
-    # El token se usa como nombre de usuario, con contraseña vacía.
+    # Token is used as username, password is empty (SNCF Basic Auth scheme).
     auth = (get_token(), "")
     url = f"{SNCF_BASE}{path}"
     response = httpx.get(url, auth=auth, params=params, timeout=15)
