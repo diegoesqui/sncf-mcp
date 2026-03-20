@@ -1,35 +1,57 @@
 # 🚄 SNCF MCP Server
 
-Servidor MCP para búsqueda de trenes en Francia (datos SNCF/TGV/TER).
+An MCP (Model Context Protocol) server for searching French train schedules using real SNCF data (TGV, TER, Intercités).
 
-Compatible con **cualquier cliente MCP**: Claude Desktop, Cursor, Copilot, etc.
+Compatible with **any MCP client**: Claude Desktop, Cursor, GitHub Copilot, and more.
 
 ---
 
-## Setup rápido (local)
+## Requirements
 
-### 1. Consigue tu API key gratis
+- Python 3.10+
+- A free SNCF API token — register at [api.sncf.com](https://api.sncf.com)
+- Authentication: HTTP Basic Auth (username = token, password = empty)
 
-Regístrate en https://api.sncf.com — recibes el token por email.  
-Autenticación: HTTP Basic Auth (usuario = token, contraseña vacía).
+---
 
-### 2. Entorno virtual Python (recomendado)
+## Local Setup
+
+### 1. Clone the repository
 
 ```bash
-cd navitia-mcp
+git clone https://github.com/diegoesqui/sncf-mcp.git
+cd sncf-mcp
+```
+
+### 2. Create a virtual environment
+
+```bash
 python3 -m venv .venv
-source .venv/bin/activate        # macOS/Linux
+source .venv/bin/activate    # macOS / Linux
+# .venv\Scripts\activate     # Windows
+```
+
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configura el token
+### 4. Set your API token
 
-Crea un fichero `.env` en la carpeta (no lo subas a Git):
+Create a `.env` file in the project root (never commit this file):
+
 ```
-NAVITIA_TOKEN=tu_token_aquí
+NAVITIA_TOKEN=your_token_here
 ```
 
-### 4. Arranca el servidor
+Or export it directly:
+
+```bash
+export NAVITIA_TOKEN="your_token_here"
+```
+
+### 5. Start the server
 
 ```bash
 python server.py
@@ -37,9 +59,10 @@ python server.py
 
 ---
 
-## Integración con Claude Desktop
+## Claude Desktop Integration
 
-Edita el fichero de configuración:
+Edit the Claude Desktop configuration file:
+
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -47,41 +70,41 @@ Edita el fichero de configuración:
 {
   "mcpServers": {
     "sncf-trains": {
-      "command": "/ruta/absoluta/navitia-mcp/.venv/bin/python",
-      "args": ["/ruta/absoluta/navitia-mcp/server.py"],
+      "command": "/absolute/path/to/sncf-mcp/.venv/bin/python",
+      "args": ["/absolute/path/to/sncf-mcp/server.py"],
       "env": {
-        "NAVITIA_TOKEN": "tu_token_aquí"
+        "NAVITIA_TOKEN": "your_token_here"
       }
     }
   }
 }
 ```
 
-Reinicia Claude Desktop completamente (Cmd+Q en macOS).
+Fully restart Claude Desktop (Cmd+Q on macOS). You should see a 🔧 tools icon in the chat when the server is active.
 
 ---
 
-## Despliegue en Synology NAS (Docker)
+## Docker Deployment (Synology NAS or any server)
 
-### 1. Construye la imagen
+### Build the image
 
 ```bash
 docker build -t sncf-mcp:latest .
 ```
 
-### 2. Crea el fichero de entorno
+### Configure the token
 
 ```bash
-echo "NAVITIA_TOKEN=tu_token_aquí" > .env
+echo "NAVITIA_TOKEN=your_token_here" > .env
 ```
 
-### 3. Arranca con docker-compose
+### Start the container
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Conecta Claude Desktop al contenedor
+### Connect Claude Desktop to the container
 
 ```json
 {
@@ -90,47 +113,59 @@ docker compose up -d
       "command": "docker",
       "args": ["exec", "-i", "sncf-mcp", "python", "server.py"],
       "env": {
-        "NAVITIA_TOKEN": "tu_token_aquí"
+        "NAVITIA_TOKEN": "your_token_here"
       }
     }
   }
 }
 ```
 
-> **Synology DSM:** importa el `docker-compose.yml` desde Container Manager → Projects.
+> **Synology DSM:** import `docker-compose.yml` directly via Container Manager → Projects.
 
 ---
 
-## Tools disponibles
+## Available Tools
 
-| Tool | Descripción |
+| Tool | Description |
 |------|-------------|
-| `search_station` | Busca estaciones por nombre, devuelve IDs |
-| `search_trains` | Busca trenes entre dos ciudades en una fecha/hora |
-| `search_trains_detailed` | Detalle completo: paradas, correspondencias, duración |
-| `next_departures` | Lista todos los trenes de un día completo |
+| `search_station` | Search for a French station by name, returns IDs |
+| `search_trains` | Find trains between two cities on a given date and time |
+| `search_trains_detailed` | Full itinerary breakdown: stops, connections, leg durations |
+| `next_departures` | List all departures for a full day between two stations |
 
 ---
 
-## Ejemplos de uso
+## Usage Examples
+
+Once connected to Claude, just ask naturally:
 
 ```
-¿Qué trenes hay de Toulouse a Marsella el 6 de abril por la tarde?
-Lista todos los trenes del jueves de Lyon a París.
-Dame el detalle del segundo tren de Toulouse a Marsella el 13 de agosto.
+What trains are there from Toulouse to Marseille on April 6th in the afternoon?
+Show me all trains from Lyon to Paris next Thursday.
+Give me the full details of the second train from Toulouse to Marseille on August 13th.
+List all departures from Bordeaux to Toulouse next Tuesday.
 ```
 
 ---
 
-## Estructura de archivos
+## Project Structure
 
 ```
-navitia-mcp/
-├── server.py           # Servidor MCP principal
-├── requirements.txt    # Dependencias Python
-├── Dockerfile          # Imagen Docker
-├── docker-compose.yml  # Despliegue en NAS/servidor
-├── .env                # Token (NO subir a Git)
-├── .gitignore          # Excluye .env y .venv
-└── README.md           # Este fichero
+sncf-mcp/
+├── server.py           # MCP server (tools + SNCF API client)
+├── requirements.txt    # Python dependencies
+├── Dockerfile          # Docker image definition
+├── docker-compose.yml  # Container deployment
+├── .env                # API token — DO NOT commit
+├── .gitignore          # Excludes .env and .venv
+└── README.md           # This file
 ```
+
+---
+
+## Notes
+
+- **Schedules are real-time** — data comes directly from SNCF via the Navitia engine
+- **Prices are not available** — the free SNCF API covers schedules only, not ticketing
+- The server uses **stdio transport**, the standard MCP mode for local clients
+- For remote access via claude.ai web, SSE/HTTP mode would need to be added
