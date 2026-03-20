@@ -1,0 +1,22 @@
+services:
+  sncf-trains:
+    build: .
+    image: sncf-mcp:latest
+    container_name: sncf-mcp
+    restart: unless-stopped
+    environment:
+      # Nunca pongas el token directamente aquí.
+      # Usa un fichero .env en la misma carpeta:
+      #   echo "NAVITIA_TOKEN=tu_token" > .env
+      NAVITIA_TOKEN: ${NAVITIA_TOKEN}
+    # MCP stdio no expone puertos — el cliente lo llama como proceso
+    # Si en el futuro quieres modo SSE/HTTP (para claude.ai web), descomenta:
+    # ports:
+    #   - "8000:8000"
+    stdin_open: true
+    tty: false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
